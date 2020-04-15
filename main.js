@@ -11,11 +11,13 @@ var population = [];
 var elapsedTime;
 
 // control variables
-
+let randomizePositions = false;
 let totalPopulation = 75;
 let infectedProportion = 0.05;
+let robotProportion = 0.10;
 let peopleSpeedInteraction = 20;
 let chanceOfContamination = 0.3;
+let chanceOfContaminationRobot = 0.1;
 let incubationTime = 5;
 let sickTime = 10;
 let chanceOfDeath = 0.2;
@@ -40,6 +42,34 @@ let healthColors = {
 // Listen to the onLoad event
 window.onload = init;
 
+
+function configureSliders(){
+  var slider = document.getElementById("selPop");
+  var output = document.getElementById("textPop");
+  output.innerHTML = slider.value; // Display the default slider value
+// Update the current slider value (each time you drag the slider handle)
+  slider.oninput = function() {
+    output.innerHTML = this.value;
+  }
+
+  var sliderInfect = document.getElementById("selInfect");
+  var outputInfect = document.getElementById("textInfect");
+  outputInfect.innerHTML = sliderInfect.value; // Display the default slider value
+// Update the current slider value (each time you drag the slider handle)
+  sliderInfect.oninput = function() {
+    outputInfect.innerHTML = this.value;
+  }
+
+  var sliderDeath = document.getElementById("selDeath");
+  var outputDeath = document.getElementById("textDeath");
+  outputDeath.innerHTML = sliderDeath.value; // Display the default slider value
+// Update the current slider value (each time you drag the slider handle)
+  sliderDeath.oninput = function() {
+    outputDeath.innerHTML = this.value;
+  }
+  
+}
+
 function coinToss(){
   return (Math.floor(Math.random() * 2) == 0) ? true : false;
 }
@@ -61,10 +91,11 @@ function init() {
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
     fixDpi()
+    configureSliders();
     elapsedTime = document.getElementById("time");
 
     setupGraph();
-    createWorld(false, infectedProportion);
+    createWorld(randomizePositions, infectedProportion, robotProportion);
 
     window.requestAnimationFrame(gameLoop);
 }
@@ -72,7 +103,7 @@ function init() {
 
 class PersonObject
 {
-    constructor (context, health, x, y, vx, vy){
+    constructor (context, health, hasRobot, x, y, vx, vy){
         this.context = context;
         this.x = x;
         this.y = y;
@@ -81,13 +112,14 @@ class PersonObject
         this.health = health;
         this.timeGotInfected = 0;
         this.timeGotSick = 0;
+        this.hasRobot = hasRobot;
     }
 }
 
 class Person extends PersonObject
 {
-    constructor (context, health, x, y, vx, vy){
-        super(context, health, x, y, vx, vy);
+    constructor (context, health, hasRobot, x, y, vx, vy){
+        super(context, health, hasRobot, x, y, vx, vy);
         this.radius = circleRadius;
     }
 
@@ -140,6 +172,11 @@ class Person extends PersonObject
         this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
         this.context.fillStyle = healthColors[this.health];
         this.context.fill();
+        if(this.hasRobot){
+          this.context.lineWidth = "5"
+          this.context.strokeStyle = "gray";
+          this.context.stroke();
+        }
     }
 
     update(secondsPassed){
@@ -150,7 +187,7 @@ class Person extends PersonObject
     
 }
 
-function createWorld(random, percent){
+function createWorld(random, infectedPercent, robotPercent){
   var xincr = Math.floor(canvas.width/Math.sqrt(totalPopulation));
   var yincr = Math.floor(canvas.height/Math.sqrt(totalPopulation));
   var x = 0;
@@ -158,11 +195,13 @@ function createWorld(random, percent){
   for(var i = 0 ; i < totalPopulation; i++){
     var xvdir = coinToss() ? -1 : 1;
     var yvdir = coinToss() ? -1 : 1;
-    var isInfected = proportion(percent) ? status.infected : status.healthy;
+    var isInfected = proportion(infectedPercent) ? status.infected : status.healthy;
+    var hasRobot = ((isInfected == status.healthy)  && proportion(robotPercent)) ? true : false;
     if(random){
       population.push(new Person(
         context,
         isInfected,
+        hasRobot,
         canvas.width * Math.random() + circleRadius,
         canvas.height * Math.random() + circleRadius,
         xvdir * (Math.random() * peopleSpeedInteraction / 10 + peopleSpeedInteraction),
@@ -178,6 +217,7 @@ function createWorld(random, percent){
       population.push(new Person(
         context,
         isInfected,
+        hasRobot,
         x + 10 * Math.random(),
         y + 10 * Math.random(),
         xvdir * (Math.random() * peopleSpeedInteraction / 10 + peopleSpeedInteraction),
@@ -210,11 +250,12 @@ function handleCollision(person1, person2){
 }
 
 function handleTransmission(person1, person2){
+  chance = (person1.hasRobot || person1.hasRobot) ? chanceOfContaminationRobot : chanceOfContamination;
   if(person1.isHealthy() && person2.canTransmit()){
-    if(proportion(chanceOfContamination)){person1.gotInfected(oldTimeStamp);}
+    if(proportion(chance)){person1.gotInfected(oldTimeStamp);}
   } 
   if(person2.isHealthy() && person1.canTransmit()){
-    if(proportion(chanceOfContamination)){person2.gotInfected(oldTimeStamp);}
+    if(proportion(chance)){person2.gotInfected(oldTimeStamp);}
   }  
 }
 
@@ -369,15 +410,6 @@ let waitBeforeEnd = 5;
 
 function isTheEnd(){
   return (getCanTransmit() > 0) ? false : true;
-  // if(infectedCount > 0 && (timeStamp - lastTimeCheckEnd > waitBeforeEnd * 1000)){
-  //   if(lastTimeCheckDeaths == currentDeaths){ return true; }
-  //   else
-  //   {
-  //     lastTimeCheckDeaths = currentDeaths;
-  //     lastTimeCheckEnd = timeStamp;
-  //   }
-  // }
-  // return false;
 }
 
 function gameLoop(timeStamp) {
