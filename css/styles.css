@@ -145,6 +145,7 @@ a {
 }
 
 .footer .fa-heart {
+  font-family: "FontAwesome";
   color: #fb866a;
 }
 .footer .fa-github {
