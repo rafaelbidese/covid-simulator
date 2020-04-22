@@ -57,7 +57,8 @@ body .title {
   display: flex;
   align-items: center;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
+
   max-width: 800px;
 }
 
@@ -75,6 +76,7 @@ body .title {
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 3rem;
+  z-index: 1;
 }
 .slider-container {
   display: flex;
@@ -118,4 +120,33 @@ body .title {
   box-shadow: 0 1px #666;
   transform: translateY(2px);
 
+}
+
+.svg-container {
+  height:350px !important;
+  margin-top: 0px !important;
+
+}
+.main-svg {
+  height: 400px !important;
+  padding-bottom: 2rem;
+}
+
+
+.footer {
+  color: #DCDCDC;
+  display: block;
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+  color: #DCDCDC
+}
+
+.footer .fa-heart {
+  color: #fb866a;
+}
+.footer .fa-github {
+  color: #000;
 }

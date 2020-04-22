@@ -7,14 +7,15 @@ var rectY = 0;
 var circleRadius = 10;
 let oldTimeStamp = 0;
 let controlIsTheEnd = false;
-var population = [];
+let population = [];
 var elapsedTime;
+let startTime = null;
 
 // control variables
-let randomizePositions = false;
-let totalPopulation = 75;
+let randomizePositions = true;
+let totalPopulation = 100;
 let infectedProportion = 0.05;
-let robotProportion = 0.10;
+let robotProportion = 0;
 let peopleSpeedInteraction = 20;
 let chanceOfContamination = 0.3;
 let chanceOfContaminationRobot = 0.1;
@@ -42,32 +43,22 @@ let healthColors = {
 // Listen to the onLoad event
 window.onload = init;
 
-
-function configureSliders(){
-  var slider = document.getElementById("selPop");
-  var output = document.getElementById("textPop");
+function configureSlider(selector, text){
+  var slider = document.getElementById(selector);
+  var output = document.getElementById(text);
   output.innerHTML = slider.value; // Display the default slider value
-// Update the current slider value (each time you drag the slider handle)
   slider.oninput = function() {
     output.innerHTML = this.value;
   }
+}
 
-  var sliderInfect = document.getElementById("selInfect");
-  var outputInfect = document.getElementById("textInfect");
-  outputInfect.innerHTML = sliderInfect.value; // Display the default slider value
-// Update the current slider value (each time you drag the slider handle)
-  sliderInfect.oninput = function() {
-    outputInfect.innerHTML = this.value;
-  }
-
-  var sliderDeath = document.getElementById("selDeath");
-  var outputDeath = document.getElementById("textDeath");
-  outputDeath.innerHTML = sliderDeath.value; // Display the default slider value
-// Update the current slider value (each time you drag the slider handle)
-  sliderDeath.oninput = function() {
-    outputDeath.innerHTML = this.value;
-  }
-  
+function configureSliders(){
+  configureSlider("selPop","textPop")
+  configureSlider("selInfect","textInfect")
+  configureSlider("selDeath","textDeath")
+  configureSlider("selTransmissionChance","textTransmissionChance")
+  configureSlider("selRobotPop","textRobotPop")
+  configureSlider("selRobotChance","textRobotChance")
 }
 
 function coinToss(){
@@ -80,23 +71,43 @@ function proportion(percent){
 
 function fixDpi(){
   dpi = window.devicePixelRatio;
-  var style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
-  var style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+  var style_height =+ getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+  var style_width =+ getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
   canvas.setAttribute('height', style_height * dpi);
   canvas.setAttribute('width', style_width * dpi);
 }
 
+function formSubmitted(event) {
+  event.preventDefault();
+  totalPopulation            = document.getElementById("selPop").value;
+  infectedProportion         = document.getElementById("selInfect").value/100;
+  robotProportion            = document.getElementById("selRobotPop").value/100;
+  chanceOfContamination      = document.getElementById("selTransmissionChance").value/100;
+  chanceOfContaminationRobot = document.getElementById("selRobotChance").value/100;
+  chanceOfDeath              = document.getElementById("selDeath").value/100;
+  initSimulation()
+    
+}
+
+function initSimulation(){
+  startTime = null;
+  population = [];
+  elapsedTime = document.getElementById("time");
+  setupGraph();
+  createWorld(randomizePositions, infectedProportion, robotProportion);
+}
+
+
 // Trigger init function when the page has loaded
 function init() {
     canvas = document.getElementById('canvas');
+    var form = document.getElementById('form');
+    form.addEventListener('submit', formSubmitted);
+
     context = canvas.getContext('2d');
     fixDpi()
     configureSliders();
-    elapsedTime = document.getElementById("time");
-
-    setupGraph();
-    createWorld(randomizePositions, infectedProportion, robotProportion);
-
+    initSimulation();
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -189,7 +200,7 @@ class Person extends PersonObject
 
 function createWorld(random, infectedPercent, robotPercent){
   var xincr = Math.floor(canvas.width/Math.sqrt(totalPopulation));
-  var yincr = Math.floor(canvas.height/Math.sqrt(totalPopulation));
+  var yincr = Math.floor(canvas.height/Math.sqrt(totalPopulation))
   var x = 0;
   var y = 0;
   for(var i = 0 ; i < totalPopulation; i++){
@@ -202,8 +213,8 @@ function createWorld(random, infectedPercent, robotPercent){
         context,
         isInfected,
         hasRobot,
-        canvas.width * Math.random() + circleRadius,
-        canvas.height * Math.random() + circleRadius,
+        (canvas.width - 2*circleRadius) * Math.random() + 2*circleRadius,
+        (canvas.height - 2*circleRadius) * Math.random() + 2*circleRadius,
         xvdir * (Math.random() * peopleSpeedInteraction / 10 + peopleSpeedInteraction),
         yvdir * (Math.random() * peopleSpeedInteraction / 10 + peopleSpeedInteraction)
       ));    
@@ -332,7 +343,7 @@ function setupGraph(){
     }
   };
   var config = {responsive: true}
-  Plotly.plot('graph1', data, layout, config);
+  Plotly.newPlot('graph1', data, layout, config);
 }
 
 function getHealthyCount(){
@@ -404,25 +415,26 @@ function getData(first, timeStamp){
   return {y: newy, x: newx};
 }
 
-let lastTimeCheckEnd = 0;
-let lastTimeCheckDeaths = 0;
-let waitBeforeEnd = 5;
-
 function isTheEnd(){
   return (getCanTransmit() > 0) ? false : true;
 }
 
 function gameLoop(timeStamp) {
-  var secondsPassed = (timeStamp - oldTimeStamp) / 1000;
-  oldTimeStamp = timeStamp;
+  if(!startTime) startTime = timeStamp;
+
+  timeElapsed = (timeStamp - startTime);
+
+  var secondsPassed = (timeElapsed - oldTimeStamp) / 1000;
+  
+  oldTimeStamp = timeElapsed;
   
   if(!controlIsTheEnd){
-    Plotly.extendTraces('graph1', getData(false, timeStamp), [0,1,2,3,4]);
-    elapsedTime.innerHTML = (timeStamp/1000).toFixed(4);
+    Plotly.extendTraces('graph1', getData(false, timeElapsed), [0,1,2,3,4]);
+    elapsedTime.innerHTML = "Simulation time: " + (timeElapsed/1000).toFixed(4);
   }
   controlIsTheEnd = isTheEnd();
   
-  // Loop over all game objects
+  // Loop over all objects
   for (var i = 0; i < population.length; i++) {
       population[i].update(secondsPassed);
   }

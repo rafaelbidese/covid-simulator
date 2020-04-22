@@ -5,70 +5,73 @@
   <link rel="stylesheet" type="text/css" href="styles.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
   <script src="main.js"></script>
-
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <!-- Load plotly.js into the DOM -->
 	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-
+  
   <title>Covid-19 Simulator</title>
 </head>
 <body>
-<div class="page-wrapper">
+  <div class="page-wrapper">
     <h1 class="title">Covid Simulator</h1>
     <p class="time" id="time"></p>
     <div class="container">
       <canvas id="canvas" class="simulator"></canvas>
-     <div class=graph-side>
-       <form class="form">
+      <div class=graph-side>
+        <div class="graph">
+          <div id="graph1"></div> 
+        </div>
+        <form class="form" id="form">
          
         <div class="all-params">
           <div class="slider-container">
-            <h3>Population</h3>
+            <h3>Total Initial <br>Population</h3>
             <div class="slider-wrapper">
-              <input type="range" min="1" max="100" value="50" class="slider" id="selPop"><p id="textPop"></p>
+              <input type="range" min="1" max="300" value="100" class="slider" id="selPop"><p id="textPop"></p>
             </div>
           </div>
           <div class="slider-container">
-            <h3>Infected ratio (%)</h3>
+            <h3>Initial Infected <br> ratio (%)</h3>
             <div class="slider-wrapper">
-              <input type="range" min="0" max="100" value="50" class="slider" id="selInfect"><p id="textInfect"></p>
+              <input type="range" min="0" max="100" value="5" class="slider" id="selInfect"><p id="textInfect"></p>
             </div>
           </div>
           <div class="slider-container">
-            <h3>Chance of death</h3>
+            <h3>Chance of <br> Transmission (%)</h3>
             <div class="slider-wrapper">
-              <input type="range" min="1" max="100" value="50" class="slider" id="selDeath"><p id="textDeath"></p>
+              <input type="range" min="1" max="100" value="50" class="slider" id="selTransmissionChance"><p id="textTransmissionChance"></p>
             </div>
           </div>
           <div class="slider-container">
-            <h3>Chance of death</h3>
+            <h3>Chance of death (%)</h3>
             <div class="slider-wrapper">
-              <input type="range" min="1" max="100" value="50" class="slider" id="selDeath"><p id="textDeath"></p>
+              <input type="range" min="1" max="100" value="20" class="slider" id="selDeath"><p id="textDeath"></p>
             </div>
           </div>
           <div class="slider-container">
-            <h3>Chance of death</h3>
+            <h3>Robot Use (%)</h3>
             <div class="slider-wrapper">
-              <input type="range" min="1" max="100" value="50" class="slider" id="selDeath"><p id="textDeath"></p>
+              <input type="range" min="1" max="100" value="30" class="slider" id="selRobotPop"><p id="textRobotPop"></p>
             </div>
           </div>
           <div class="slider-container">
-            <h3>Chance of death</h3>
+            <h3>Robot Chance of <br> Transmission (%)</h3>
             <div class="slider-wrapper">
-              <input type="range" min="1" max="100" value="50" class="slider" id="selDeath"><p id="textDeath"></p>
+              <input type="range" min="1" max="100" value="15" class="slider" id="selRobotChance"><p id="textRobotChance"></p>
             </div>
           </div>
 
       </div>
 
-        <input class="submit" type="submit" target="_blank"></input>
+        <input class="submit" type="submit"></input>
 
        </form>
-        <div class="graph">
-          <div id="graph1"></div> 
-        </div>
      </div>
     </div>
 </div>
-
+<footer class=footer>
+    Designed with <i class='fa fa-heart'></i>
+    <a href="http://www.github.com/rafaelbidese/covid-simulator" class="" target="_blank">by Rafael Bidese <i class='fa fa-github'></i></a>
+</footer>
 </body>
 </html>
