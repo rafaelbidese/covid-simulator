@@ -1,12 +1,11 @@
 # covid-simulator
 Covid Simulator. Implements different mechanics of transmission and isolation of the population.
 
+Live [DEMO HERE](https://loving-leavitt-6e5ea8.netlify.app/)
+
 <p align="center">
   <img height="480" height="300" src="/images/simulator.jpeg">
 </p>
-
-
-Live [DEMO HERE](https://loving-leavitt-6e5ea8.netlify.app/)
 
 The main objective is to study the impact of using Robots to do daily tasks as a means of social distancing.
 
