@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/506f2c57-187f-4470-885e-3182d254c94f/deploy-status)](https://app.netlify.com/sites/loving-leavitt-6e5ea8/deploys)
+
 # covid-simulator
 Covid Simulator. Implements different mechanics of transmission and isolation of the population.
 
